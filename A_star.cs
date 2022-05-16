@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace N_Puzzle
@@ -37,6 +38,8 @@ namespace N_Puzzle
 
             HashSet<string> visited = new HashSet<string>();
             visited.Add(State.getStringPuzzle(current.puzzle));
+            var timer = new Stopwatch();
+            timer.Start();
             while (!(current.isGoal()))
             {
                 // Gettign the legal moves of the blank square
@@ -50,6 +53,7 @@ namespace N_Puzzle
                     /*if (State.getStringPuzzle(current.puzzle) == State.getStringPuzzle(newPuzzle))
                         continue;*/
                     // Console.WriteLine("df");
+
                     // if the child is visited we skip adding it's heuristic values to the priority queue
                     if (visited.Contains(State.getStringPuzzle(newPuzzle)))
                         continue;
@@ -66,6 +70,9 @@ namespace N_Puzzle
                 visited.Add(State.getStringPuzzle(current.puzzle)); // setting the current node as visited
 
             }
+            timer.Stop();
+            Console.WriteLine("Time in sceonds: " + timer.Elapsed + " s");
+            Console.WriteLine("Time in Milliseconds: " + timer.ElapsedMilliseconds + " ms");
         }
 
         public void printNumOfSteps()

@@ -9,7 +9,6 @@ namespace N_Puzzle
     public class State
     {
         private static int SIZE;
-
         public int[,] puzzle;
         private State parent;
         private List<State> children;
