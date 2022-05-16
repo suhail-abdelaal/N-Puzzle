@@ -54,7 +54,7 @@ namespace N_Puzzle
 
                 algo.solve();
                 algo.printNumOfSteps();
-                algo.printSteps(algo.current);
+                //algo.printSteps(algo.current);
             }
             else
                 Console.WriteLine("Not Solvable");
