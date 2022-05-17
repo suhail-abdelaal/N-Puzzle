@@ -58,6 +58,8 @@ namespace N_Puzzle
 
                 algo.solve();
                 algo.printNumOfSteps();
+              //  if (size == 3)
+                    algo.printSteps(algo.current);
             }
             else
                 Console.WriteLine("Not Solvable");

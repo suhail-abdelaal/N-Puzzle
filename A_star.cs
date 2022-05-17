@@ -82,6 +82,7 @@ namespace N_Puzzle
                 return;
 
             printSteps(it.getParent());
+
             it.display();
             Console.WriteLine();
         }

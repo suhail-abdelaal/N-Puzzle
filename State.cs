@@ -29,7 +29,7 @@ namespace N_Puzzle
             
             this.parent = parent;
             this.children = new List<State>();
-            this.lastMove = '0';
+            this.lastMove = 'X';
             if (this.parent == null)
             {
                 depth = 0;
@@ -308,7 +308,7 @@ namespace N_Puzzle
 
         public void display()
         {
-            Console.WriteLine("# " + this.depth);
+            Console.WriteLine("------ (" + this.depth + ")");
             for (int i = 0; i < SIZE; i++)
             {
                 for (int j = 0; j < SIZE; j++)
