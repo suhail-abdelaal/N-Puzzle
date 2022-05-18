@@ -11,24 +11,9 @@ namespace N_Puzzle
         private bool hamming;
         private bool manhattan;
 
-        public A_star(State initial, int flag)
+        public A_star(State initial)
         {
             current = (State)initial.Clone();
-            hamming = false;
-            manhattan = false;
-            switch (flag)
-            {
-                case 1: hamming = true; 
-                    break;
-                case 2: manhattan = true;
-                    break;
-                case 3:
-                    {
-                        hamming = true;
-                        manhattan = true;
-                    }
-                    break;
-            }
         }
 
         public void solve()
@@ -36,8 +21,9 @@ namespace N_Puzzle
             var pq = new PriorityQueue<State, int>();
             var visited = new HashSet<string>();
             var timer = new Stopwatch();
-           
-            visited.Add(State.getStringPuzzle(current.puzzle));
+
+            visited.Add(current.sb.ToString());
+
             timer.Start();
             while (!(current.isGoal()))
             {
@@ -49,21 +35,22 @@ namespace N_Puzzle
                 {
                     // Generating a child 
                     int[,] newPuzzle = current.getnewPuzzle(moves[i]);
+                    State newChild = new State(newPuzzle, current);
 
-                    // if the child is visited we skip adding it's heuristic values to the priority queue
-                    if (visited.Contains(State.getStringPuzzle(newPuzzle)))
+                    //if the child is visited we skip adding it's heuristic values to the priority queue
+                    if (visited.Contains(newChild.sb.ToString())) 
                         continue;
 
-                    State newChild = new State(newPuzzle, current);
-                    current.addChild(newChild);
 
-                    if (hamming)
-                        pq.Enqueue(newChild, newChild.getHammingDist());
-                    if (manhattan)
-                        pq.Enqueue(newChild, newChild.getManhattanDist());
+                    current.addChild(newChild);
+                    if (State.isHamming)
+                        pq.Enqueue(newChild, newChild.hamming());
+                    if (State.isManhattan)
+                        pq.Enqueue(newChild, newChild.manhattan());
+
                 }
                 current = pq.Dequeue(); // Assigning the node with the minimum heuristic score to the current node
-                visited.Add(State.getStringPuzzle(current.puzzle)); // setting the current node as visited
+                visited.Add(current.sb.ToString()); // setting the current node as visited
 
             }
             timer.Stop();
