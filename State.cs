@@ -8,8 +8,12 @@ namespace N_Puzzle
 {
     public class State
     {
-        private static int SIZE;
+        private static int SIZE = 0;
+        public static bool isHamming = false;
+        public static bool isManhattan = false;
+
         public int[,] puzzle;
+        public StringBuilder sb;
         private State parent;
         private List<State> children;
         private KeyValuePair<int, int> zeroPos;
@@ -18,26 +22,26 @@ namespace N_Puzzle
         private int hammingDistance;
         private int manhattanDistance;
              
-        public State(int[,] tiles, State? parent = null)
+        public State(int[,] tiles, State parent)
         {
-            SIZE = tiles.GetLength(0);
-
             this.puzzle = new int[SIZE, SIZE];
+            this.sb = new StringBuilder();
+
             for (int i = 0; i < SIZE; i++)
+            {
                 for (int j = 0; j < SIZE; j++)
+                {
                     this.puzzle[i, j] = tiles[i, j];
+                    sb.Append(puzzle[i, j].ToString());
+                }
+            }
             
             this.parent = parent;
             this.children = new List<State>();
-            this.lastMove = '0';
+            this.lastMove = 'X';
+
             if (this.parent == null)
-            {
                 depth = 0;
-                for (int i = 0; i < SIZE; i++)
-                    for (int j = 0; j < SIZE; j++)
-                        if (tiles[i, j] == 0)
-                            zeroPos = new KeyValuePair<int, int>(i, j);
-            }
             else
             {
                 depth = this.parent.getDepth() + 1;
@@ -58,8 +62,8 @@ namespace N_Puzzle
                         break;
                 }
             }
-            hammingDistance = hamming();
-            manhattanDistance = manhattan();
+            hammingDistance = -1;
+            manhattanDistance = -1;
         }
 
         public void setDepth(int depth)
@@ -92,26 +96,11 @@ namespace N_Puzzle
             return puzzle[i, j];
         }
 
-        public static string getStringPuzzle(int[,] p)
-        {
-            string puzz = "";
-            for (int i=  0; i < SIZE; i++)
-            {
-                for (int j = 0; j < SIZE; j++)
-                    puzz += p[i, j].ToString();
-            }
-            return puzz;
-        }
-
-
         public bool isSolvable()
         {
             // Copying the 2D puzzle into 1D array
             int[] temp = new int[SIZE * SIZE];
-            int ind = 0;
-            for (int i = 0; i < SIZE; i++) 
-                for (int j = 0; j < SIZE; j++)
-                    temp[ind++] = puzzle[i, j]; 
+            Buffer.BlockCopy(puzzle, 0, temp, 0, puzzle.Length * sizeof(int));
 
             // Calculate number of inverstions
             int inverstions = 0;
@@ -162,7 +151,7 @@ namespace N_Puzzle
             return -1; // Impossible case
         }
 
-        private int manhattan()
+        public int manhattan()
         {
             int manhattanSum = 0;
             for (int i = 0; i < SIZE; i++)
@@ -175,7 +164,7 @@ namespace N_Puzzle
                     manhattanSum += Math.Abs(goalRow - i) + Math.Abs(goalCol - j);
                 }
             }
-            return manhattanSum + depth;
+            return manhattanDistance = manhattanSum + depth;
         }
 
         public int getManhattanDist()
@@ -183,7 +172,7 @@ namespace N_Puzzle
             return manhattanDistance;
         }
 
-        private int hamming()
+        public int hamming()
         {
             int hammingSum = 0;
             int factor = (puzzle[0, 0] == 0) ? 0 : 1;
@@ -197,7 +186,7 @@ namespace N_Puzzle
                         hammingSum++;
                 }
             }
-            return hammingSum + depth;
+            return hammingDistance = hammingSum + depth;
         }
 
         public int getHammingDist()
@@ -207,15 +196,18 @@ namespace N_Puzzle
 
         public bool isGoal()
         {
-            return (manhattanDistance - depth == 0);
+            int distance = (isHamming ? hammingDistance : manhattanDistance);
+            return (distance - depth == 0);
         }
 
         public int[,] getnewPuzzle(char direction)
         {
+            int[] temp = new int[SIZE * SIZE];
+            Buffer.BlockCopy(puzzle, 0, temp, 0, puzzle.Length * sizeof(int));
+
+            // copying to 2D array
             int[,] newPuzzle = new int[SIZE, SIZE];
-            for (int i = 0; i < SIZE; i++)
-                for (int j = 0; j < SIZE; j++)
-                    newPuzzle[i, j] = puzzle[i, j];
+            Buffer.BlockCopy(temp, 0, newPuzzle, 0, newPuzzle.Length * sizeof(int));
 
             int x = getZeroPos().Key;
             int y = getZeroPos().Value;
@@ -308,7 +300,7 @@ namespace N_Puzzle
 
         public void display()
         {
-            Console.WriteLine("# " + this.depth);
+            Console.WriteLine("------ (" + this.depth + ")");
             for (int i = 0; i < SIZE; i++)
             {
                 for (int j = 0; j < SIZE; j++)
@@ -316,7 +308,22 @@ namespace N_Puzzle
                 Console.WriteLine();
             }
         }
+        
+        public void copyArray(int[,] arr)
+        {
+            int[] temp = new int[SIZE * SIZE];
 
+            // copying to a 1D array
+            Buffer.BlockCopy(arr, 0, temp, 0, arr.Length * sizeof(int));
+
+            // copying to 2D array
+            Buffer.BlockCopy(temp, 0, this.puzzle, 0, temp.Length * sizeof(int));
+        }
+
+        public static void setSize(int size)
+        {
+            SIZE = size;
+        }
         public static int size()
         {
             return SIZE;
