@@ -15,13 +15,12 @@ namespace N_Puzzle
         public int[,] puzzle;
         public StringBuilder sb;
         private State parent;
-        private List<State> children;
         private KeyValuePair<int, int> zeroPos;
         private char lastMove;
         private int depth;
         private int hammingDistance;
         private int manhattanDistance;
-             
+
         public State(int[,] tiles, State parent)
         {
             this.puzzle = new int[SIZE, SIZE];
@@ -37,7 +36,6 @@ namespace N_Puzzle
             }
             
             this.parent = parent;
-            this.children = new List<State>();
             this.lastMove = 'X';
 
             if (this.parent == null)
@@ -62,8 +60,11 @@ namespace N_Puzzle
                         break;
                 }
             }
-            hammingDistance = -1;
-            manhattanDistance = -1;
+
+            if (isHamming)
+                hamming();
+            if (isManhattan)
+                manhattan();
         }
 
         public void setDepth(int depth)
@@ -85,7 +86,7 @@ namespace N_Puzzle
         {
             return parent;
         }
-
+        
         public KeyValuePair<int, int> getZeroPos()
         {
             return zeroPos;
@@ -106,28 +107,21 @@ namespace N_Puzzle
             int inverstions = 0;
             for (int i = 0; i < SIZE * SIZE - 1; i++)
             {   
-                for (int j = i + 1;j < SIZE * SIZE; j++)
+                for (int j = i + 1; j < SIZE * SIZE; j++)
                 {
                     // Ignoring comparision with the blank square
                     if (temp[i] == 0 || temp[j] == 0)
                         continue;
 
-                    // Checking inverstion pairs
-                    /*if (temp[i] > temp[j] && temp[i] != 0 && temp[j] != 0)
-                        ++inverstions;*/
-
                     if (temp[i] > temp[j])
                         ++inverstions;
 
-                    /*  if (puzzle[j, i] > 0 && puzzle[j, i] > puzzle[i, j])
-                          ++inverstions;*/
                 }
             }
+            int blankRow = SIZE - zeroPos.Key;
 
             if (SIZE % 2 != 0)
                 return (inverstions % 2 == 0);
-
-            int blankRow = getZeroRow();
 
             // For all 'blacnkRow' Even and 'inverstions' Odd is solvable, and vice versa
             if (blankRow % 2 == 0 && inverstions % 2 != 0)
@@ -140,16 +134,6 @@ namespace N_Puzzle
             return false;
         }
 
-        // Getting the row position of the blank square starting from the bottom
-        private int getZeroRow()
-        {
-            for (int i = SIZE - 1; i >= 0; i--)
-                for (int j = SIZE - 1; j >= 0; j--)
-                    if (puzzle[i, j] == 0)
-                        return  - i;
-
-            return -1; // Impossible case
-        }
 
         public int manhattan()
         {
@@ -167,21 +151,17 @@ namespace N_Puzzle
             return manhattanDistance = manhattanSum + depth;
         }
 
-        public int getManhattanDist()
-        {
-            return manhattanDistance;
-        }
+
 
         public int hamming()
         {
             int hammingSum = 0;
-            int factor = (puzzle[0, 0] == 0) ? 0 : 1;
             for (int i = 0; i < SIZE; i++)
             {
                 for (int j = 0; j < SIZE; j++)
                 {
                     if (puzzle[i, j] == 0) continue;
-                    int pos = (i * SIZE) + j + factor;
+                    int pos = (i * SIZE) + j + 1;
                     if (puzzle[i, j] != pos)
                         hammingSum++;
                 }
@@ -189,10 +169,7 @@ namespace N_Puzzle
             return hammingDistance = hammingSum + depth;
         }
 
-        public int getHammingDist()
-        {
-            return hammingDistance;
-        }
+
 
         public bool isGoal()
         {
@@ -247,26 +224,6 @@ namespace N_Puzzle
             return newPuzzle;
         }
 
-        public void addChild(State child)
-        {
-            children.Add(child);
-        }
-
-        public State getChild(int i)
-        {
-            return children[i];
-        }
-
-        public object Clone()
-        {
-            return this.MemberwiseClone();
-        }
-
-        public List<State> getChildren()
-        {
-            return children;
-        }
-
         public List<char> getMoves()
         {
             List<char> moves = new List<char>();
@@ -287,7 +244,17 @@ namespace N_Puzzle
 
             return moves;
         }
-        
+
+        public int getManhattanDist()
+        {
+            return manhattanDistance;
+        }
+
+        public int getHammingDist()
+        {
+            return hammingDistance;
+        }
+
         public char getLastMove()
         {
             return lastMove;
@@ -296,6 +263,16 @@ namespace N_Puzzle
         public void setLastMove(char lastMove)
         {
             this.lastMove = lastMove;
+        }
+
+        public static void setSize(int size)
+        {
+            SIZE = size;
+        }
+
+        public static int size()
+        {
+            return SIZE;
         }
 
         public void display()
@@ -308,25 +285,6 @@ namespace N_Puzzle
                 Console.WriteLine();
             }
         }
-        
-        public void copyArray(int[,] arr)
-        {
-            int[] temp = new int[SIZE * SIZE];
 
-            // copying to a 1D array
-            Buffer.BlockCopy(arr, 0, temp, 0, arr.Length * sizeof(int));
-
-            // copying to 2D array
-            Buffer.BlockCopy(temp, 0, this.puzzle, 0, temp.Length * sizeof(int));
-        }
-
-        public static void setSize(int size)
-        {
-            SIZE = size;
-        }
-        public static int size()
-        {
-            return SIZE;
-        }
     }
 }
