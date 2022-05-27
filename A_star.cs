@@ -8,12 +8,11 @@ namespace N_Puzzle
     public class A_star
     {
         public State current;
-        private bool hamming;
-        private bool manhattan;
+        public static bool isComplete = false;
 
         public A_star(State initial)
         {
-            current = (State)initial.Clone();
+            current = initial;
         }
 
         public void solve()
@@ -22,11 +21,17 @@ namespace N_Puzzle
             var visited = new HashSet<string>();
             var timer = new Stopwatch();
 
-            visited.Add(current.sb.ToString());
+            pq.Enqueue(current, current.getHammingDist());
 
-            timer.Start();
+            if (isComplete)
+                timer.Start();
+
             while (!(current.isGoal()))
             {
+                current = pq.Dequeue(); // Assigning the node with the minimum heuristic score to the current node
+
+                visited.Add(current.sb.ToString());
+
                 // Gettign the legal moves of the blank square
                 List<char> moves = current.getMoves();
 
@@ -38,24 +43,27 @@ namespace N_Puzzle
                     State newChild = new State(newPuzzle, current);
 
                     //if the child is visited we skip adding it's heuristic values to the priority queue
-                    if (visited.Contains(newChild.sb.ToString())) 
+                    if (visited.Contains(newChild.sb.ToString()))
                         continue;
 
 
-                    current.addChild(newChild);
+                    // Console.WriteLine("Child: " + newChild.getHammingDist());
                     if (State.isHamming)
-                        pq.Enqueue(newChild, newChild.hamming());
+                        pq.Enqueue(newChild, newChild.getHammingDist());
                     if (State.isManhattan)
-                        pq.Enqueue(newChild, newChild.manhattan());
+                        pq.Enqueue(newChild, newChild.getManhattanDist());
 
                 }
-                current = pq.Dequeue(); // Assigning the node with the minimum heuristic score to the current node
-                visited.Add(current.sb.ToString()); // setting the current node as visited
+
+               
 
             }
-            timer.Stop();
-            Console.WriteLine("Time in sceonds: " + timer.Elapsed + " s");
-            Console.WriteLine("Time in Milliseconds: " + timer.ElapsedMilliseconds + " ms");
+            if (isComplete)
+            {
+                timer.Stop();
+                Console.WriteLine("Time in sceonds: " + timer.Elapsed + " s");
+                Console.WriteLine("Time in Milliseconds: " + timer.ElapsedMilliseconds + " ms");
+            }
         }
 
         public void printNumOfSteps()
@@ -63,6 +71,7 @@ namespace N_Puzzle
             Console.WriteLine("# Steps: "+ current.getDepth());
             Console.WriteLine();
         }
+
         public void printSteps(State it)
         {
             if (it.getParent() == null)
